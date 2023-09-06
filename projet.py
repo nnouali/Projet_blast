@@ -1,22 +1,19 @@
 import numpy as np
+from Bio.Align import substitution_matrices
 
-# matrice de score avec les bons para
-def score_matrix (rows, colums) :
-    matrix = [] 
-    for i in range (rows):
-        row = []
-        for j in range (colums):
-            score = 0
-            row.apped(score)
-        matrix.append()
-    return matrix
-#ou 
-matrix_similarite = np.array([
-    [0, 0, 30],
-    [50, 5, 25],
-    [8, 12, 22]
-])
 
+def blosum_score():
+    # Accédez à la matrice BLOSUM62 à l'aide de Bio.Align.substitution_matrices
+    blosum62 = substitution_matrices.load("BLOSUM62")
+
+    # Exemple d'accès aux scores de substitution
+    score_LD = blosum62["L"]["D"]  # Score de substitution entre A et R
+    print(f"Score de substitution entre L et D: {score_LD}")
+
+
+if __name__ =="__main__":
+    blosum_score()
+'''
 def calculate_score(query, database_sequence):
     # Calculez le score de correspondance entre la séquence de requête et la séquence de la base de données.
     score = 0
@@ -44,3 +41,4 @@ results = blast(query_sequence, database_sequences, threshold_score)
 
 for result in results:
     print(f"Alignement trouvé dans la séquence : {result[0]} à la position {result[1]} avec un score de {result[2]}")
+'''
