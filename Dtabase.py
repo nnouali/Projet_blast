@@ -1,57 +1,58 @@
-from http.client import LineTooLong
 import sqlite3
 
-"""
-# Création d'une connexion à la base de données 
-conn = sqlite3.connect('ma_base_de_donnees.db')
+# Création d'une connexion à la base de données
+conn = sqlite3.connect('sequence_database.db')
 
 # Curseur pour interagir avec la base de données
-cursor = conn.cursor()
-
-# Table qui stocke les séquences
-cursor.execute('''
-    CREATE TABLE sequences (
-        id INTEGER PRIMARY KEY,
-        nom TEXT,
-        description TEXT,
-        sequence TEXT
+cur = conn.cursor()
+""" TODO REPRENDRE COMMENT CHARGER LA DB
+# Table qui stockera les mots de trois lettres et leurs positions
+cur.execute('''
+    CREATE TABLE sequence_words (
+        sequence_id TEXT,
+        word TEXT,
+        position INTEGER
     )
-''')"""
+''')
+"""
+# Valider la transaction
+conn.commit()
 
-def read_fasta(fasta_text):
-    sequences = []
-    fasta_id = ""
-    description = ""
-    sequence = ""
+def split_sequence_into_words(sequence, sequence_id):
+    """Découpe une séquence en mots de trois lettres et les enregistre avec leurs positions.
 
-    for line in fasta_text.split('\n'):
-        line = line.strip()
-        if line.startswith(">"):
-            if sequence:
-                sequences.append((fasta_id, description, sequence))
-            fasta_id, description = line[1:].split(" ", 1)
-            sequence = ""
-        else:
-            sequence += line
+    Args:
+        sequence : La séquence.
+        sequence_id : L'identifiant de la séquence.
+    """
+    words = [sequence[i:i+3] for i in range(0, len(sequence), 3)]
+    for i, word in enumerate(words):
+        # Insérer le mot et sa position dans la table de la base de données
+        cur.execute('''
+            INSERT INTO sequence_words (sequence_id, word, position)
+            VALUES (?, ?, ?)
+        ''', (sequence_id, word, i))
+    # Valider la transaction
+    conn.commit()
 
-    if sequence:
-        sequences.append((fasta_id, description, sequence))
-        
-    return sequences
+def read_fasta_file(file_path):
+    with open(file_path, 'r') as fasta_file:
+        fasta_id = ""
+        sequence = ""
+        for line in fasta_file:
+            line = line.strip()
+            if line.startswith(">"):
+                if sequence:
+                    split_sequence_into_words(sequence, fasta_id)
+                fasta_id = line[1:]
+                sequence = ""
+            else:
+                sequence += line
+        if sequence:
+            split_sequence_into_words(sequence, fasta_id)
 
 if __name__ == "__main__":
-    fasta_data = ">sp|A0A0C5B5G6|MOTSC_HUMAN Mitochondrial-derived peptide MOTS-c OS=Homo sapiens OX=9606 GN=MT-RNR1 PE=1 SV=1\nMRWQEMGYIFYPRKLR"
-    sequences = read_fasta(fasta_data)
+    # Lisez le fichier FASTA et effectuez les opérations de découpage en mots de trois lettres
+    read_fasta_file("Liste_Fasta.txt")
 
-    for fasta_id, description, sequence in sequences:
-        print("Nom:", fasta_id)
-        print("Description:", description)
-        print("Séquence:", sequence)
-
-#sp|A0A0C5B5G6|MOTSC_HUMAN Mitochondrial-derived peptide MOTS-c OS=Homo sapiens OX=9606 GN=MT-RNR1 PE=1 SV=1
-#MRWQEMGYIFYPRKLR
-
-
-
-
-
+    conn.close()
