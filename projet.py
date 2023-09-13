@@ -4,6 +4,11 @@ import sqlite3
 # Charger la matrice de substitution BLOSUM62
 blosum62 = substitution_matrices.load("BLOSUM62")
 
+
+
+# Charger la matrice de substitution BLOSUM62
+blosum62 = substitution_matrices.load("BLOSUM62")
+
 aminoacids = ['A', 'C', 'D', 'E',
               'F', 'G', 'H', 'I',
               'K', 'L', 'M', 'N',
@@ -14,6 +19,7 @@ blosum62Map = {}
 for i in aminoacids:
     for j in aminoacids:
         blosum62Map[(i, j)] = blosum62[i][j]
+
 
 def FindWords(inputSequence, wordLength):
     wordsList = []
@@ -95,28 +101,7 @@ def CompareNeighborsWithDatabase(neighbors, database_path):
 
     return matching_neighbors
 
-def ExtendWordInDatabase(query_sequence, matched_word, matched_position, blosum62Map):
-    max_score = 0
-    max_alignment = ""
-    cumulative_score = 0
-
-    # Séquence de la base de données (à remplacer par votre séquence réelle)
-    db_sequence = "DAPCQEHKRGWPNDC"
-
-    # Alignement vers la droite
-    for i in range(matched_position, len(query_sequence)):
-        current_word = query_sequence[i]
-        db_index = i - matched_position
-        if db_index < len(db_sequence):
-            db_amino_acid = db_sequence[db_index]
-            score = CalculateScore(current_word, db_amino_acid, blosum62Map)
-            cumulative_score += score
-            max_alignment += db_amino_acid
-
-            if cumulative_score < 0:
-                break
-
-            if cumulative_score > max_score:
-                max_score = cumulative_score
-
-    return max_alignment, max_score
+def ExtendSequenceWithNeighbor(sequence, neighbor, word_length):
+    sequence_id, neighbor_word, original_word, score, position = neighbor
+    extended_sequence = sequence[:position] + neighbor_word + sequence[position + word_length:]
+    return extended_sequence

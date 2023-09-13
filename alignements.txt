@@ -1,5 +1,0 @@
-ID de séquence : test, Alignement : EHK, Score maximal : 18.0
-ID de séquence : test, Alignement : CLELEH, Score maximal : 13.0
-ID de séquence : test, Alignement : HKM, Score maximal : 12.0
-ID de séquence : test, Alignement : ANC, Score maximal : 11.0
-ID de séquence : test, Alignement : LEHEHK, Score maximal : 12.0
