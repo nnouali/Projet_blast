@@ -15,6 +15,7 @@ Avant d'utiliser ce projet, assurez-vous d'avoir les éléments suivants install
 - Python 
 - SQLite3
 - Biopython
+- Streamlit 
 
 ## Installation
 
@@ -28,3 +29,4 @@ Pour utiliser ce projet, suivez ces étapes :
 
 Une fois le projet installé, vous pouvez lancer l'application en exécutant `python main.py`. 
 un exemple est déja fourni .
+Pour visualisé les differentes distributions `streamlit run main.py`

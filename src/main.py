@@ -1,6 +1,9 @@
 from Bio.Align import substitution_matrices
 from Bio import SeqIO
 import sqlite3
+import math
+import streamlit as st
+import plotly.express as px
 
 from database import (
     split_sequence_into_words,
@@ -24,13 +27,19 @@ def main():
     """
     Fonction principale du script.
     """
-
+    # Au début de la fonction main()
+    scores_distribution = []
+    e_values_distribution = []
+    extended_word_data = {}  # Ajout d'une variable pour stocker les données d'alignement affichage st
+    e_value_to_sequence = {}
+    scores_to_sequence = {}
+    
     if __name__ == "__main__":
         # Initialisation des variables pour stocker le meilleur score et l'alignement correspondant
         best_score = None
         best_alignment_info = None
         # Lire le fichier FASTA
-        read_fasta_file("Liste_Fasta2.txt")
+        read_fasta_file("Liste_Fasta.txt")
         # A MODIFIER AVECT FASTA_FILE read_fasta_file_request("requete.txt")
         fasta_file = "./test.fasta"  # Remplacez par le chemin de votre fichier FASTA
         sequence = str(SeqIO.read(fasta_file, "fasta").seq)
@@ -118,6 +127,18 @@ def main():
                         'scores': scores
                     }
 
+        # Affiche le contenu du fichier mots_voisins_scores.txt
+        with open('mots_voisins_scores.txt', 'r') as seq_file:
+            seq_content = seq_file.read()
+            st.write("Contenu du fichier mots_voisins_scores.txt :")
+            st.text(seq_content)
+
+        # Affiche le contenu du fichier seq_voisins_scores.txt
+        with open('seq_voisins_scores.txt', 'r') as seq_file:
+            seq_content = seq_file.read()
+            st.write("Contenu du fichier seq_voisins_scores.txt :")
+            st.text(seq_content)
+            
         # Affiche l'alignement des mots étendus avec les scores à chaque position
         for (sequence_id, neighbor_word), data in extended_word_data.items():
             extended_word = data['extended_word']
@@ -220,11 +241,27 @@ def main():
             print("     Sequence database :", alignment_complete_db)
             print("     Length            : ", str(len(alignment_complete_db)))
 
+
+
             # Calcule le score entre alignment_complete et alignment_complete_db
             new_score = sum(blosum62Map[pair] for pair in zip(alignment_complete, alignment_complete_db))
 
             # Affiche le nouveau score
             print("\nFinal score:", new_score)
+            
+
+            # Calcul de l'E-value
+            lambda_value = 0.267  # Valeur lambda pour BLOSUM62 (vous pouvez ajuster cette valeur)
+            k_value = 0.049  # Valeur K pour BLOSUM62 (vous pouvez ajuster cette valeur)
+            m = len(sequence)  # Longueur de la séquence d'origine
+
+            e_value = k_value * m * math.exp(-lambda_value * new_score)
+
+            # Après le calcul de l'E-value
+            scores_distribution.append(new_score)
+            e_values_distribution.append(e_value)
+            e_value_to_sequence[e_value] = alignment_complete  # Assurez-vous que "alignment_complete" contient la séquence correspondante
+            scores_to_sequence[new_score] = alignment_complete  # Assurez-vous que "alignment_complete" contient la séquence correspondante
 
             # Comparer le nouveau score avec le meilleur score actuel
             if best_score is None or new_score > best_score:
@@ -246,6 +283,42 @@ def main():
         if best_score is not None:
             print("\nBEST SCORE :", best_score)
             print("\n".join(best_alignment_info))
+        
+        print("\nDistribution des Scores :")
+        print(scores_distribution)
+        print("\nDistribution des E-values :")
+        print(e_values_distribution)
+        
+         # Affiche le meilleur score et l'alignement sur streamlit
+        st.subheader("Meilleur Score et Alignement Correspondant")
+        if best_score is not None:
+            st.write(f"Meilleur Score : {best_score}")
+            for line in best_alignment_info:
+                st.text(line)
+        else:
+            st.info("Aucun meilleur score et alignement correspondant disponibles.")
+
+        # Affiche la distribution des scores
+        st.subheader("Distribution des Scores")
+        for score, sequence in scores_to_sequence.items():
+            st.write(f"Score : {score}, Séquence : {sequence}")
+        if scores_distribution:
+            fig_scores = px.histogram(x=scores_distribution, nbins=50, title="Distribution des Scores")
+            st.plotly_chart(fig_scores)
+        else:
+            st.info("Aucune donnée de distribution des scores disponible.")
+
+        # Crée une courbe pour la distribution des E-values
+        st.write("Distribution des E-values :")
+                # Affiche les correspondances E-value -> Séquence
+        st.subheader("Correspondance E-value -> Séquence")
+        for e_value, sequence in e_value_to_sequence.items():
+            st.write(f"E-value : {e_value}, Séquence : {sequence}")   
+        fig_e_values = px.histogram(e_values_distribution, nbins=50, title="Distribution des E-values")
+        st.plotly_chart(fig_e_values)
+
 
 if __name__ == "__main__":
+    st.title("Projet court : BLast")
+    
     main()
