@@ -1,0 +1,5 @@
+ID de séquence : test, Mot Voisin : EHK, Mot d'Origine : EHK, Score : 18.0, Position : 5
+ID de séquence : test, Mot Voisin : HKR, Mot d'Origine : HKM, Score : 12.0, Position : 6
+ID de séquence : test, Mot Voisin : CQE, Mot d'Origine : CLE, Score : 12.0, Position : 3
+ID de séquence : test, Mot Voisin : QEH, Mot d'Origine : LEH, Score : 11.0, Position : 4
+ID de séquence : test, Mot Voisin : APC, Mot d'Origine : ANC, Score : 11.0, Position : 1
